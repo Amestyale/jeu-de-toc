@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jeu de toc</title>
+    <script src="https://kit.fontawesome.com/0ac8ecd512.js" crossorigin="anonymous"></script>
+    <script src="./board.js"></script>
+    <script src="./classes/board.js"></script>
+    <script src="./classes/case.js"></script>
+    <script src="./classes/side.js"></script>
+    <script src="./classes/pawn.js"></script>
+    <script src="./classes/team.js"></script>
+    <script src="./classes/comportment.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.4.0/dist/confetti.browser.min.js"></script>
+    <link rel="stylesheet" href="./style.css" />
+</head>
+<body>
+    <main>
+        <div id="title"><p>Cool, tu viens pour jouer ?</p></div>
+        <canvas id="board" style="display: none;"></canvas>
+        <div id="won" style="background-image: url('./images/laurel.png');">
+            <p>Le duo red/yellow l'emporte !</p>
+            <button style="display: none;"><i class="fas fa-redo-alt"></i> Rejouer</button>
+        </div>
+
+        <div id="launch">
+            <label>
+                <p>Ton mood du moment :</p>
+                <select id="whatsOnMyMood">
+                    <option value="true">J'suis on fire, je vais les éclater (1 joueur, 3 IA)</option>
+                    <option value="false">Franchement flemme, je vais chercher le pop-corn (4 IA)</option>
+                </select>
+            </label>
+            <label>
+                <p>Combien de chevaux par joueur ? </p>
+                <select id="howManyHorses">
+                    <option value="1">A un, c'est bien !</option>
+                    <option value="2">A deux, c'est mieux !</option>
+                    <option value="3">A trois, c'est extra !</option>
+                    <option value="4">A quatre c'est... ! Ehm... C'est... C'est plus qu'à trois !</option>
+                </select>
+            </label>
+            <button id="start" onclick="startGame()"><i class="fas fa-play"></i>Lancer une partie</button>
+        </div>
+        <div id="cards">
+            <div id="hand"></div>
+        </div>
+        
+        <div onclick="modale('brief')" id="learn" class="fab" >
+            <i class="fas fa-graduation-cap"></i>
+        </div>
+        <div onclick="modale('historic')" id="fab_historic" class="fab fabgame">
+            <i class="fas fa-history"></i>
+        </div>
+        <div onclick="toogleGameState(0)" id="fab_toggle" class="fab fabgame">
+            <i class="fas fa-pause"></i>
+        </div>
+    </main>
+    <script>
+        let board = null
+        document.addEventListener('contextmenu', event => event.preventDefault());
+        function toogleGameState(state){
+            let toogle = document.querySelector("#fab_toggle")
+            if(state == 0){
+                board.pause()
+                toogle.querySelector("i").className = "fas fa-play"
+                toogle.addEventListener("click",()=>{
+                    toogleGameState(1)
+                })
+            } else {
+                board.play()
+                toogle.querySelector("i").className = "fas fa-pause"
+                toogle.addEventListener("click",()=>{
+                    toogleGameState(0)
+                })
+            }
+        }
+        function callApi(url, type, headers = new Headers(), callb = null){
+            params = { method: 'GET' }
+            if(headers) params["headers"] = headers;
+            fetch(url,params).then(function(response) {
+                if(response.ok) {
+                    return eval(`response.${type}()`) 
+                }
+            })
+            .then(function(data){
+                return (callb) ? callb(data) : data;
+            })
+            .catch(err => {
+                console.log(err)
+            })
+        }
+
+        function endGame(board){
+            delete board
+        }
+
+        function modale(id =null){
+            document.querySelectorAll(".modal").forEach((modale)=>{
+                modale.style.display = "none"
+            })
+            if(id){
+                if(board) board.pause()
+                document.querySelector(`#${id}`).style.display = "block"
+                document.querySelector(`.filter`).style.display = "block"
+            } else {
+                if(board) board.play()
+                document.querySelector(`.filter`).style.display = "none"
+            }
+        }
+
+        function tutocard(i,element){
+            document.querySelector(".icon-tutos").querySelector(".current").classList.remove("current")
+            element.classList.add("current")
+            document.querySelectorAll(".tutocard").forEach((tuto,index)=>{
+                tuto.style.display = (index == i) ? "block" : "none"
+            })
+        }
+
+        function startGame(){
+            let e = document.querySelector("#whatsOnMyMood");
+            let mood = (e.options[e.selectedIndex].value=="true") ? true : false
+            e = document.querySelector("#howManyHorses");
+            let nbHorses = e.options[e.selectedIndex].value;
+            document.querySelector("#board").style.display = "block"
+            document.querySelector("#launch").style.display = "none"
+            board = new Board(document.querySelector("#board"),mood,nbHorses );
+        }
+
+        function changeText(content){
+            document.querySelector("#title p").innerText = content
+        }
+
+        function restart(){
+            document.querySelector("#launch").style.display = "block"
+            document.querySelector("#won").style.display = "none"
+            document.querySelector("#won button").style.display = "none"
+            document.querySelector("#title").innerText = "Yeah, on rejoue ?!"
+        }
+    </script>
+    <div class="filter" onclick="modale()"></div>
+    <div id="brief" class="modal">
+        <header>
+          <h2>C'est quoi le jeu de toc ?</h2>
+        </header>
+        <div>
+          <p>
+            Le jeu de toc, ou jeu de tock, est un jeu de société proche du jeu des petits chevaux. Il se joue à deux équipes de deux joueurs, qui devront collaborer pour sauver l'ensemble de leurs pions et ainsi remporter le partie.
+          </p>
+        </div>
+        <footer>
+            <button onclick="modale('flow')">Suivant</button>
+        </footer>
+    </div>
+    <div id="flow" class="modal">
+        <header>
+          <h2>Et comment ça se joue ?</h2>
+        </header>
+        <div>
+          <p>
+            Ici, pas de lancers de dés hasardeux ni prière silencieuse pour obtenir le bon chiffre ! Tout se joue aux cartes, de la sortie des pions à leur sauvetage en passant par leur déplacement.
+          </p>
+          <p>
+            Un jeu complet de 52 cartes sera utilisé durant la partie, distribué au fur et à mesure des rounds. Eheh, je vous entends d'ici <i>Comment ça un round ?</i> Il est vrai que ça peut prêter à confusion. Appelons plutôt ça une manche ! Chaque manche suit le même déroulé :
+          </p>
+          <ul>
+              <li>
+                  <p>On troque !<p>
+                  <p>Chaque joueur donne une carte à son coéquipier, sans connaître sa main. Observe bien le plateau pour lui offrir la carte parfaite ! Et si tu ne l'as pas... Tu peux toujours jeter la moins utile en t'excusant.</p>
+              </li>
+              <li>
+                  <p>On joue !<p>
+                  <p>Tour à tour chaque joueur peut jouer une carte sur l'un de ses pions, ou en défausser une. Les joueurs usent/jettent ainsi toutes leurs cartes, mettant fin à la manche lorsque toutes les mains sont vides, une nouvelle commence alors.</p>
+              </li>
+          </ul>
+          <p>Le nombre de cartes distribuées au début d'une manche varie au cours du jeu. D'abord tu auras 5 cartes, puis 4, puis de nouveau 4, et on reprend du début. Et si tu calcules bien... Bingo, bravo champion ! 5x4 + 2(4x4) = 52 ! Autrement dit, le paquet entier défile en trois manches, puis est remélangé. Tu peux donc t'amuser à compter les cartes pour mieux anticiper (on est pas un casino, on râlera pas promis)</p>
+          <p>Les manches s'enchaînent ainsi jusqu'à ce qu'une équipe ait sauvé tous ses pions. </p>
+        </div>
+        <footer>
+            <button onclick="modale('iwanttowin')">Suivant</button>
+        </footer>
+    </div>
+    <div id="iwanttowin" class="modal">
+        <header>
+          <h2>I wanna win ! But... how ?</h2>
+        </header>
+        <div>
+            <p>Bonne question, ça ! Je t'ai dit qu'il fallait sauver tes pions, mais pas comment on les sauvait. Regarde donc cette image :</p>
+            <img src="./images/tutowin.jpg" style="display: block;margin: auto;width: 400px;">
+            <p>Le pion rouge sur une case rouge est un pion <b>sorti</b>, qui est d'ailleurs positionné sur sa <b>case de sortie</b>, il peut donc avancer sur le plateau. Pour être sauvé il doit tout d'abord atteindre son <b>écurie</b> (case rouge pointée par la flèche orange). Chaque équipe a sa propre écurie, situé juste derrière la case de sortie de même couleur. Une fois sur cette case, son propriétaire devra jouer un <b>as</b> ou un <b>roi</b> pour le sauver définitivement</p>
+        </div>
+        <footer>
+            <button onclick="modale('howtomove')">Suivant</button>
+        </footer>
+    </div>
+    <div id="howtomove" class="modal">
+        <header>
+          <h2>Règles de déplacement</h2>
+        </header>
+        <div>
+            <p>Les règles de déplacement ne suivent pas exactement celles des petits chevaux traditionnels</p>
+            <ul>
+                <li>Règle 1 : Sauf si l'effet d'une carte mentionne le contraire, on ne peut déplacer que ses propres pions. Une fois tous ses pions sauvés, on peut alors jouer les pions de notre coéquipier</li>
+                <li>Règle 2 : Le dépassement n'est pas un souci, il est possible de courir au-delà des pions alliés et adverses</li>
+                <li>Règle 3 : Si un pion finit son déplacement sur une case occupée, le pion qui occupait la case se fait alors manger et est exclu du plateau. Il faudra à nouveau sortir, c'est le jeu ma pauvre Lucette ! :D</li>
+            </ul>
+        </div>
+        <footer>
+            <button onclick="modale('specials')">Suivant</button>
+        </footer>
+    </div>
+    <div id="controls" class="modal">
+        <header>
+          <h2>Et comment je fais tous tes trucs ?</h2>
+        </header>
+        <div>
+            <p>J'y viens j'y viens, patience petit scarabé. Voici les contrôles selon le contexte !</p>
+            <p><img class="click left" src="./images/click.png"> Sur une carte : sélectionner la carte à donner (en phase d'échange) ou à jouer (en phase de jeu)</p>
+            <p><img class="click left" src="./images/click.png"> Sur un pion, avant d'avoir joué une carte : changer le pion que la carte affectera</p>
+            <p><img class="click left" src="./images/click.png"> Sur un pion, après avoir joué un valet: échanger la place du pion avec le pion courant</p>
+            <p><img class="click left" src="./images/click.png"> Sur un pion, après avoir joué un 5 ou un 7: déplacer le pion</p>
+            <p><img class="click" src="./images/click.png"> Sur une carte, en phase de jeu : défausser la carte</p>
+            <p><img class="click" src="./images/keyboard.png"> Le clic droit est utilisé pour jouer, aussi si un curieux veut ouvrir l'inspecteur, il faudra utiliser le raccourci du navigateur. Désolé !</p>
+        </div>
+        <footer>
+            <button onclick="modale()">Suivant</button>
+        </footer>
+    </div>
+    <div id="specials" class="modal">
+        <header>
+          <h2>Magical cards !</h2>
+        </header>
+        <div>
+            <p><i>Gneuhgneuhgneuh il a l'air super chiant ton jeu, en gros on joue juste des cartes au lieu des dés</i></p>
+            <p>Eh bien non, jeune impertinent ! Toutes les cartes ne se valent pas, et certaines donnent lieu à des effets particuliers.</p>
+            <div>
+                <div class="icon-tutos">
+                    <span class="current" onclick="tutocard(0, this)">A</span>
+                    <span onclick="tutocard(1, this)">K</span>
+                    <span onclick="tutocard(2, this)">Q</span>
+                    <span onclick="tutocard(3, this)">J</span>
+                    <span onclick="tutocard(4, this)">10</span>
+                    <span onclick="tutocard(5, this)">7</span>
+                    <span onclick="tutocard(6, this)">5</span>
+                    <span onclick="tutocard(7, this)">4</span>
+                </div>
+                <div class="tutocard">
+                    <p><i class="fas fa-star"></i><i class="fas fa-hiking"></i>As : Tortue polyvalente</p>
+                    <p>L'as permet à un pion de sortir de sa maison, ou d'être sauvé s'il est placé sur son écurie. Sinon, il peut aussi te permettre d'avancer d'une case, tout bêtement</p>
+                </div>
+                <div class="tutocard">
+                    <p><i class="fas fa-star"></i><i class="fas fa-running"></i>Roi : Sauver, sortir ou courir</p>
+                    <p>Le roi permet à un pion de sortir de sa maison, ou d'être sauvé s'il est placé sur son écurie. Sinon, il peut aussi te permettre d'avancer de treize cases, beau sprint !</p>
+                </div>
+                <div class="tutocard">
+                    <p><i class="fas fa-running"></i>Reine : Courir</p>
+                    <p>La reine permet à un pion d'avancer de 12 cases, plus d'un quart du plateau en une carte !</p>
+                </div>
+                <div class="tutocard">
+                    <p><i class="fas fa-street-view"></i>Valet : Joueur de Portal</p>
+                    <p>Le valet permet à un pion d'échanger de place avec n'importe quel autre</p>
+                </div>
+                <div class="tutocard">
+                    <p><i class="fas fa-recycle"></i>10 : le Recycleur</p>
+                    <p>Le 10 force le joueur suivant à se défausser d'une carte au lieu d'en jouer une. Et vice supplémentaire, son effet s'applique également quand le 10 est défaussé : plus besoin de jouer pour faire chier !</p>
+                </div>
+                <div class="tutocard">
+                    <p><i class="fas fa-users"></i><i class="fas fa-drumstick-bite"></i>7 : le Généreux gourmand</p>
+                    <p>Le 7 peut être décomposé entre tous vos pions, tu peux par exemple déplacer un premier de 2, un deuxième de 1 et un troisième de 4. En plus de cela, les pions ainsi déplacés mangeront tout sur leur passage. Attention, la fragmentation se fait case par case sans ctrl-z possible (non ce n'est pas une flemme de code, mais une <a target="_blank" href="https://fr.wikipedia.org/wiki/Jeu_de_toc#:~:text=Il%20n%27est%20pas%20autoris%C3%A9%20de%20revenir%20sur%20un%20des%20pions%20d%C3%A9j%C3%A0%20d%C3%A9plac%C3%A9s%20dans%20le%20compte%20du%207%20pour%20finir%20le%20compte%20de%207%2C%20donc%20faites%20bien%20attention%20%C3%A0%20ne%20pas%20commettre%20d%27erreur%20de%20calcul%20dans%20la%20fragmentation%20du%207.">règle officielle</a> !)</p>
+                </div>
+                <div class="tutocard">
+                    <p><i class="fas fa-gift"></i>5 : Santa Claus</p>
+                    <p>Le 5 peut être joué sur n'importe quel pion, allié ou adverse. Un bon moyen d'aider ton allié, ou de forcer un adversaire à refaire un tour de plateau !</p>
+                </div>
+                <div class="tutocard">
+                    <p><i class="fas fa-history"></i>4 : Rollback buggé MAIS sécurisé</p>
+                    <p>Le 4 permet de revenir en arrière, en faisant reculer un de tes pions de 4 cases ni plus ni moins. Mais joue pas au plus fin, tu ne peux pas arriver à reculer dans ou derrière ton écurie è_é</p>
+                </div>
+            </div>
+        </div>
+        <footer>
+            <button onclick="modale('controls')">Suivant</button>
+        </footer>
+    </div>
+    
+    <div id="historic" class="modal">
+        <header>
+          <h2>Historique des cartes jouées/défaussées</h2>
+        </header>
+        <div id="moves" style="height: 400px;overflow: auto;">
+
+        </div>
+    </div>
+
+<div id="banner">Blue saved a pawn</div>
+</body>
+<script src="./confetti.js"></script>
+</html>

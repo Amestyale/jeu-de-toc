@@ -1,0 +1,387 @@
+@font-face {
+    font-family: Poppins;
+    src: url("./fonts/poppins/Poppins-Light.ttf");
+  }
+
+html, body{
+    font-family: Poppins;
+    overflow: hidden;
+    min-height: 100vh;
+    min-width: 100vw;
+    margin: 0;
+    padding: 0;
+    background-color: whitesmoke;
+}
+a{
+    text-decoration: none;
+    color: inherit;
+}
+main{
+    display: grid;
+    grid-template-columns: 1fr 800px 1fr;
+    grid-template-rows: auto;
+    grid-template-areas:
+            "title title title"
+            ". won ."
+            ". params ."
+            ". board ."
+            ". hand .";
+}
+
+main header{
+    grid-area: header;
+    background-color: burlywood;
+    color: whitesmoke;    
+    border-bottom-left-radius: 50px;
+    border-bottom-right-radius: 50px;
+}
+main header ul{
+    margin: 9px;
+}
+main header nav li{
+    display: inline;
+    font-size: 24px;
+    margin: 9px;
+    margin-right: 27px;
+    font-weight: bold;
+}
+canvas{
+    grid-area: board;
+}
+#title{
+    grid-area: title;
+    margin-bottom: 2em;
+}
+#title p {
+    font-size: 2em;
+    text-align: center;
+    margin-bottom: 0;
+    min-height: 1.5em;
+}
+
+#cards{
+    position: relative;
+    grid-area: hand;
+    width: 800px;
+    margin-top: 27px;
+}
+#hand{
+    position: absolute;
+    left: 50%;
+    transform: translate(-33%, 0%);
+    white-space: nowrap;
+    --transform-y : 0%;
+    counter-reset: card;   
+}
+#hand .card--current{
+    --transform-y: -25%;
+    transition-duration: 1s;
+}
+#hand .card:nth-child(1){
+    transform: translate(-0%, var(--transform-y));
+}
+#hand .card:nth-child(2){
+    transform: translate(-50%, var(--transform-y));
+}
+#hand .card:nth-child(3){
+    transform: translate(-100%, var(--transform-y));
+}
+#hand .card:nth-child(4){
+    transform: translate(-150%, var(--transform-y));
+}
+#hand .card:nth-child(5){
+    transform: translate(-200%, var(--transform-y));
+}
+.card--unplayable{
+    filter: grayscale(0.2) brightness(0.6);
+}
+
+/* FAB */
+.fab{
+    position: fixed;
+    font-size: 2em;
+    width: 2em;
+    height: 2em;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff6eb;
+    background-color: #7a5d36;
+    border-radius: 50%;
+    z-index: 0;
+}
+#learn{    
+    bottom: .5em;
+    right: 18px;
+}
+#fab_historic{    
+    bottom: .5em;
+    left: 18px;
+}
+#fab_toggle{
+    bottom: 3em;
+    left: 18px;
+}
+
+/* MODALES */
+.filter{
+    height: 100vh;
+    width: 100vw;
+    top: 0;
+    left: 0;
+    position: fixed;
+    background-color: rgba(0, 0, 0, 0.4);
+    z-index: 1;
+    display: none;
+    opacity: 1;
+    transition: opacity 1s ease-in-out;
+}
+.filter.light{
+    background-color: rgba(255, 255, 255, 0.75)
+}
+.modal{
+    display: none;
+    height: fit-content;
+    width: 800px;
+    background-color: whitesmoke;
+    border-radius: 2px;
+    padding: 18px;
+    position:fixed;
+    top:50%;
+    left:50%;
+    transform: translate(-50%,-50%);
+    z-index: 2;
+}
+.modal > header {
+  border-bottom: 2px solid burlywood;
+  text-align: center;
+}
+.modal > header > h2{
+  margin: 0;
+  line-height:2em;
+  color: #7a5d36;
+}
+.modal p, .modal li{    
+    color: #7a5d36;
+    font-size: 1em;
+    text-align: justify;
+    line-height: 1.25em;
+}
+.modal li{
+    margin-bottom: 12px;
+}
+.modal footer{
+  padding: 16px 0 4px 0;
+}
+.modal button{    
+    color: #fff6eb;
+    background-color: #e6ccac;
+    font-size: 1em;
+    padding: 8px 16px;
+    border-radius: 5px;
+    border: none;
+    margin-left: auto;
+    display: block;
+}
+
+/* TUTOS */
+.tutocard{
+    display: none;
+    min-height: 175px;
+}
+.tutocard:nth-child(2){
+    display: block;
+}
+.tutocard p{
+    text-align-last: center;
+    text-align: justify;
+    padding: 0 1em;
+}
+.tutocard a{
+    text-decoration: underline;
+    text-underline-offset: 1px;
+}
+.tutocard i{
+    margin-right: 0.5em;
+}
+.tutocard p:nth-child(1){
+    font-size: 1.75em;
+}
+.icon-tutos{
+    display: flex;
+    justify-content: space-around;
+    padding: 0 15%;
+}
+.icon-tutos > span{
+    width: 40px;
+    height: 40px;
+    display: inline-block;
+    text-align: center;
+    border-radius: 50%;
+    font-size: 1.5em;
+    font-weight: bold;
+    line-height: 40px;
+    color: #7a5d36;
+    background-color: #fff6eb;
+    border: 1px solid #7a5d36;
+    cursor: pointer;
+}
+
+.icon-tutos > span.current{
+    background-color: #7a5d36;
+    color: #fff6eb;
+    border: 1px solid #fff6eb;
+}
+
+/* WON */
+#won{    
+    grid-area: won;
+    padding: 25% 25px;
+    background-image: url('./images/laurel.png');
+    background-repeat: no-repeat;
+    background-size: contain;
+    background-position: center;
+    position: relative;
+    display: none;
+}
+#won p{   
+    text-align: center;
+    background-color: gold;
+    padding: 1em;
+    font-size: 2em;
+    border-radius: 5px;
+    color: whitesmoke;
+    font-weight: bold;
+    position: relative;
+}
+#won > p::before{    
+    content: "";
+    width: 0;
+    height: 0;
+    border-top: 56px solid transparent;
+    border-bottom: 56px solid transparent;
+    border-left: 32px  solid whitesmoke;
+    position: absolute;
+    left: 0;
+    top: 0;
+}
+#won > p::after{
+    content: "";
+    width: 0;
+    height: 0;
+    border-top: 56px solid transparent;
+    border-bottom: 56px solid transparent;
+    border-right: 32px  solid whitesmoke;
+    position: absolute;
+    right: 0;
+    top: 0;
+}
+
+#won button{
+    color: #fff6eb;
+    background-color: #7a5d36;
+    font-size: 1em;
+    padding: 12px 32px;
+    border-radius: 5px;
+    border: none;
+    margin-left: auto;
+    display: block;
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    font-size: 1.5em;
+    transform: translate(-50%, 75%);
+}
+
+/* FORM */
+#launch{    
+    grid-area: params;
+    padding: 10% 200px;
+}
+select{
+    padding: 9px;
+    border: 1px solid gainsboro;
+    border-radius: 10px;
+    width: 100%;
+    margin-bottom: 1em;
+}
+label{
+    font-size: 1.2em;
+    text-align: center;
+}
+#start{
+    color: #fff6eb;
+    background-color: #7a5d36;
+    font-size: 1em;
+    padding: 8px 16px;
+    border-radius: 5px;
+    border: none;
+    margin: auto;
+    margin-top: 1em;
+    display: block;
+}
+#start i{
+    margin-right: 1em;
+}
+
+#moves{
+    height: 400px;
+    overflow: auto;
+    padding: 0px 150px;
+    text-align: center;
+}
+#moves img{
+    width: 25px;
+    vertical-align: middle;
+    margin-right: 8px;
+}
+
+#moves .round{
+    text-align: center;
+    font-weight: bold;
+    font-size: 1.15em;
+    margin: 6px;
+    text-decoration: underline;
+}
+
+/* FIESTA */
+#banner{   
+    display: none; 
+    background-color: gold;
+    color: white;
+    font-family: "Arial";
+    padding: 0.25em;
+    font-size: 4em;
+    text-align: center;
+    white-space: nowrap;
+    transform: rotate(-10deg);
+    position: fixed;
+    top: 40%;
+    left: -5%;
+    right: -5%;
+    z-index: 100;
+    margin-top: 0;
+    transition: opacity 1s ease-in-out;
+}
+.letter{
+    transition: font-size .75s ease-in-out;
+}
+.letter.hidden{
+    display: none;
+}
+.letter.normal{
+    display: inline;
+}
+
+.click{
+    width: 40px;
+    vertical-align: middle;
+}
+
+.click.left{
+    transform: scaleX(-1);
+}
+
+.fabgame{
+    display: none;
+}
